@@ -1,0 +1,38 @@
+@import './base.css';
+@import 'primeicons/primeicons.css';
+
+#app {
+  padding: 2rem;
+  font-weight: normal;
+}
+
+.mars-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.contentPanel {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#marsPlanet {
+  animation-name: marsRotate;
+  animation-duration: 15.5s;
+  animation-iteration-count: infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes marsRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
