@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  nestjs-mars-rover:
+    build:
+      context: ./nestjs-mars-rover
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nestjs-mars-rover:/app
+    environment:
+      - NODE_ENV=production
+
+  mars-rover-vue:
+    build:
+      context: ./mars-rover-vue
+    ports:
+      - "8080:80"
+    volumes:
+      - ./mars-rover-vue:/app
