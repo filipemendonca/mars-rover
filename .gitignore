@@ -1,0 +1,5 @@
+node_modules
+mars-rover-vue/node_modules
+mars-rover-vue/dist
+nestjs-mars-rover/node_modules
+nestjs-mars-rover/dist
