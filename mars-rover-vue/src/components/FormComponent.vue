@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { InputText, Button, InputNumber, Panel, ScrollPanel, Card, Message } from 'primevue'
-import MarsRover from './icons/MarsRover.vue'
-import Planet from './icons/Planet.vue'
+import {
+  InputText,
+  Button,
+  InputNumber,
+  Panel,
+  ScrollPanel,
+  Card,
+  Message,
+} from "primevue";
+import MarsRover from "./icons/MarsRover.vue";
+import Planet from "./icons/Planet.vue";
 </script>
 
 <template>
@@ -29,7 +37,11 @@ import Planet from './icons/Planet.vue'
           placeholder="Plateau Size X"
           style="margin-right: 5px"
         />
-        <InputNumber v-model="plateau.y" inputId="y" placeholder="Plateau Size Y" />
+        <InputNumber
+          v-model="plateau.y"
+          inputId="y"
+          placeholder="Plateau Size Y"
+        />
       </div>
     </Panel>
   </div>
@@ -55,7 +67,11 @@ import Planet from './icons/Planet.vue'
             placeholder="Instruction"
             v-on:keypress="configureInput($event, /^[mrlMRL]+$/)"
           />
-          <Button icon="pi pi-plus" @click="addField(rovers)" style="margin-left: 5px" />
+          <Button
+            icon="pi pi-plus"
+            @click="addField(rovers)"
+            style="margin-left: 5px"
+          />
           <Button
             icon="pi pi-times"
             severity="danger"
@@ -82,14 +98,26 @@ import Planet from './icons/Planet.vue'
         <Card
           v-for="(item, index) in result"
           :key="`resultRover-${index}`"
-          style="width: 15rem; justify-content: center; align-items: center; margin: 10px"
+          style="
+            width: 15rem;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+          "
         >
           <template #title>Rover - {{ index }}</template>
           <template #subtitle> <MarsRover height="100" width="100" /></template>
           <template #content>
-            <div><strong style="margin-right: 3px">Position X:</strong>{{ item.x }}</div>
-            <div><strong style="margin-right: 3px">Position Y:</strong>{{ item.y }}</div>
-            <div><strong style="margin-right: 3px">Orientation:</strong>{{ item.orientation }}</div>
+            <div>
+              <strong style="margin-right: 3px">Position X:</strong>{{ item.x }}
+            </div>
+            <div>
+              <strong style="margin-right: 3px">Position Y:</strong>{{ item.y }}
+            </div>
+            <div>
+              <strong style="margin-right: 3px">Orientation:</strong
+              >{{ item.orientation }}
+            </div>
           </template>
         </Card>
       </div>
@@ -98,69 +126,76 @@ import Planet from './icons/Planet.vue'
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import WalkService from '@/services/WalkService'
-import type ResponseData from '@/types/ResponseApi'
-import type Plateau from '@/types/Plateau'
-import type NasaType from '@/types/NasaModel'
-import type Configurations from '@/types/Configuration'
-import type RoverDTO from '@/types/Rover'
+import { defineComponent } from "vue";
+import WalkService from "@/services/WalkService";
+import type ResponseData from "@/types/ResponseApi";
+import type Plateau from "@/types/Plateau";
+import type NasaType from "@/types/NasaModel";
+import type Configurations from "@/types/Configuration";
+import type RoverDTO from "@/types/Rover";
+import { AxiosError } from "axios";
+import type FetchError from "@/types/Error";
 
 export default defineComponent({
-  name: 'execute-rovers',
+  name: "execute-rovers",
   data() {
     return {
       plateau: {
         x: null,
         y: null,
       } as Plateau,
-      rovers: [{ instruction: '', landingPosition: '' }] as Configurations[],
+      rovers: [{ instruction: "", landingPosition: "" }] as Configurations[],
       showResult: false,
       result: [] as ResponseData[],
       messages: [] as string[],
-    }
+    };
   },
   methods: {
-    configureInput(e, pattern: RegExp) {
-      const char = String.fromCharCode(e.keyCode)
-      if (pattern.test(char)) return true
-      else e.preventDefault()
+    configureInput(
+      e: { keyCode: number; preventDefault: () => void },
+      pattern: RegExp
+    ) {
+      const char = String.fromCharCode(e.keyCode);
+      if (pattern.test(char)) return true;
+      else e.preventDefault();
     },
     addField(fieldType: Configurations[]) {
-      fieldType.push({ landingPosition: '', instruction: '' })
+      fieldType.push({ landingPosition: "", instruction: "" });
     },
     removeField(index: number, fieldType: Configurations[]) {
-      fieldType.splice(index, 1)
+      fieldType.splice(index, 1);
     },
     async execute() {
       const dataPlateau: NasaType = {
         x: this.plateau.x,
         y: this.plateau.y,
-      }
+      };
       const roversDTO: RoverDTO = {
         rovers: JSON.parse(JSON.stringify(this.rovers)) as Configurations[],
-      }
+      };
 
       await WalkService.Execute(dataPlateau, roversDTO)
-        .then((response) => {
-          this.result = response?.data
-          this.showResult = true
+        .then(async (response) => {
+          response.forEach((item) => {
+            return this.result.push(item);
+          });
+          this.showResult = true;
         })
-        .catch((e: Error) => {
-          const { message, response } = e
+        .catch((e: AxiosError) => {
+          const { message, response } = e;
 
           if (!response) {
-            this.messages.push(message)
+            this.messages.push(message);
           } else {
-            const { message } = response.data
+            const { message } = response.data as FetchError;
             if (message) {
               message.forEach((item: string) => {
-                this.messages.push(item)
-              })
+                this.messages.push(item);
+              });
             }
           }
-        })
+        });
     },
   },
-})
+});
 </script>
